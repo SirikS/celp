@@ -16,14 +16,17 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
             adress:str
         }
     """
+    # als user inlogt
     if user_id:
+        # lijst aanmaken waar alle plaatsen van user inkomen
         plaatsen = []
+        # per stad kijken of user in stad heeft gereviewt
         for stad in CITIES:
             for user in USERS[stad]:
                 if user['user_id'] == user_id:
 
-                    plaatsen.append(stad)
-        print(plaatsen) 
+                    plaatsen.append(stad) 
+        # lijst met aantal reviews per plaats door user            
         counts = []
         for stad in plaatsen:
             count = 0
@@ -31,6 +34,7 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
                 if review['user_id'] == user_id:
                     count += 1
             counts.append(count)
+        # series aanmaken waarin het aantal reviews per plaats staan
         reviews_plaats = pd.Series(index=plaatsen, data=counts)
         print(reviews_plaats)  
 
