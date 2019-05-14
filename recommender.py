@@ -16,6 +16,11 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
             adress:str
         }
     """
+    if business_id:
+        # content based fitering
+        pass
+        # help mij
+        
     # als user inlogt
     if user_id:
         # lijst aanmaken waar alle plaatsen van user inkomen
@@ -24,8 +29,7 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
         for stad in CITIES:
             for user in USERS[stad]:
                 if user['user_id'] == user_id:
-
-                    plaatsen.append(stad) 
+                    plaatsen.append(stad)
         # lijst met aantal reviews per plaats door user            
         counts = []
         for stad in plaatsen:
