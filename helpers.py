@@ -20,5 +20,13 @@ def location(userid):
                 count += 1
         counts.append(count)
     # series aanmaken waarin het aantal reviews per plaats staan
-    reviews_plaats = pd.Series(index=plaatsen, data=counts)
-    return reviews_plaats  
+    reviews_plaats = pd.Series(index=plaatsen, data=counts).sort_values(ascending=False)
+    return reviews_plaats
+
+
+def cf(userid, steden, n):
+    return None
+
+def populair(steden, n):
+    return None
+

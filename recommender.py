@@ -23,7 +23,19 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
         
     # als user inlogt
     if user_id:
-        print(helpers.location(user_id))  
+        userdata = helpers.location(user_id)
+        steden = userdata[:2].index.tolist()
+        aantal_reviews = userdata.sum()
+        
+        if aantal_reviews < 5:
+            # random op basis steden
+            return helpers.populair(steden, n)
+        else:
+            # cf op basis steden
+            return helpers.cf(user_id, steden, n)
+
+
+
 
     if not city:
         city = random.choice(CITIES)
