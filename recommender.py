@@ -1,5 +1,5 @@
 from data import CITIES, BUSINESSES, USERS, REVIEWS, TIPS, CHECKINS
-import helpers
+from helpers import *
 import random
 import pandas as pd
 
@@ -23,16 +23,18 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
         
     # als user inlogt
     if user_id:
-        userdata = helpers.location(user_id)
-        steden = userdata[:2].index.tolist()
+        userdata = location(user_id)
+        stad = list(userdata[:1].index)[0]
         aantal_reviews = userdata.sum()
         
         if aantal_reviews < 5:
             # random op basis steden
-            return helpers.populair(steden, n)
+            populaireshit = populair(stad, n)
+            return returndict(list(populaireshit.index), stad)
         else:
             # cf op basis steden
-            return helpers.cf(user_id, steden, n)
+            pass
+            # return cf(user_id, steden, n)
 
 
 
