@@ -2,6 +2,7 @@ from data import CITIES, BUSINESSES, USERS, REVIEWS, TIPS, CHECKINS
 import random
 import pandas as pd
 import sklearn.metrics.pairwise as pw
+import numpy as np
 
 def location(userid):
     # lijst aanmaken waar alle plaatsen van user inkomen
@@ -97,6 +98,9 @@ def cf(userid, stad, n):
             data.append(weighted_mean(neighborhood, centered_utilitymatrix, userid))
             indexes.append(bedrijf['business_id'])
     predicted_ratings = pd.Series(index=indexes, data=data)
+    gemiddelde_rating = utilitymatrix.mean()
+    predicted_ratings = predicted_ratings + gemiddelde_rating[userid]
+    print(predicted_ratings.sort_values(ascending=False))
     # return de hoogste n bedrijven
     return predicted_ratings.sort_values(ascending=False)[:n]
 
@@ -136,5 +140,3 @@ def returndict(lijst, stad):
                 # voeg de dict toe aan de uiteindelijke lijst
                 recommended.append(gegevens)
     return recommended
-
-
