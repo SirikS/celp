@@ -19,7 +19,7 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
     if business_id:
         # content based fitering
         vergelijkbarebedrijven, stad = cbf(business_id, n)
-        return returndict(list(vergelijkbarebedrijven.index, stad)
+        return returndict(list(vergelijkbarebedrijven.index, stad))
         
     # als user inlogt
     if user_id:
