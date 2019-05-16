@@ -23,6 +23,7 @@ def location(userid):
     reviews_plaats = pd.Series(index=plaatsen, data=counts).sort_values(ascending=False)
     return reviews_plaats
 
+
 def select_neighborhood(similarity_matrix, utility_matrix, target_user, target_business):
     """selects all items with similarity > 0"""
     # take the businesses where similarity is above 0, if it doesn't work it is an empty series
@@ -46,6 +47,7 @@ def select_neighborhood(similarity_matrix, utility_matrix, target_user, target_b
             pass
 
     return bedrijven
+
 
 def weighted_mean(neighborhood, utility_matrix, user_id):
     neighbor_ratings = pd.Series()
@@ -81,26 +83,21 @@ def cf(userid, stad, n):
     # maak utilitymatrix van alle bedrijven
     ratings = pd.DataFrame.from_dict(REVIEWS[stad])
     utilitymatrix = ratings.pivot_table(values='stars', columns='user_id', index='business_id', aggfunc='mean')
-    #print(utilitymatrix)
     # mean centered ratings
     centered_utilitymatrix = utilitymatrix.sub(utilitymatrix.mean())
     similaritymatrix = pd.DataFrame(pw.cosine_similarity(centered_utilitymatrix.fillna(0)), index = centered_utilitymatrix.index, columns = centered_utilitymatrix.index)
-    #print(similaritymatrix)
-    
+
+    # bereken voor elk bedrijf wat de verwachte rating zal zijn voor user
     data=[]
     indexes=[]
     gereviewed = get_businesses(userid)
     for bedrijf in BUSINESSES[stad]:
         if bedrijf['business_id'] not in gereviewed:
             neighborhood = select_neighborhood(similaritymatrix, centered_utilitymatrix, userid, bedrijf['business_id'])
-            #print(neighborhood)
-            #predicted_ratings[bedrijf['name']] = weighted_mean(neighborhood, centered_utilitymatrix, userid)
             data.append(weighted_mean(neighborhood, centered_utilitymatrix, userid))
             indexes.append(bedrijf['business_id'])
-    
     predicted_ratings = pd.Series(index=indexes, data=data)
-  
-    
+    # return de hoogste n bedrijven
     return predicted_ratings.sort_values(ascending=False)[:n]
 
 
@@ -114,7 +111,6 @@ def populair(stad, n):
     for bedrijf in BUSINESSES[stad]:
         # als ze boven de drempelwaarde zitten
         if bedrijf["stars"] > 3:
-
             # voeg de gegevens toe aan de datalists
             data.append(bedrijf['stars'] * bedrijf["review_count"])
             indexes.append(bedrijf["business_id"])
@@ -126,11 +122,9 @@ def populair(stad, n):
 def returndict(lijst, stad):
     recommended = []
     for bedrijf in lijst:
-
         # loop door bedrijven in stad tot het bedrijf is gevonden
         for mogelijkbedrijf in BUSINESSES[stad]:
             if mogelijkbedrijf["business_id"] == bedrijf:
-
                 # verzamel de gegevens in een dict
                 gegevens = {
                             'business_id':str(bedrijf),
