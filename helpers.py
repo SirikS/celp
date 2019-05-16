@@ -74,7 +74,7 @@ def returndict(lijst, stad):
                             'business_id':str(bedrijf),
                             'stars':str(mogelijkbedrijf["stars"]),
                             'name':str(mogelijkbedrijf["name"]),
-                            'city':str(stad),
+                            'city':str(mogelijkbedrijf["city"]),
                             'adress':str(mogelijkbedrijf["address"])}
 
                 # voeg de dict toe aan de uiteindelijke lijst
