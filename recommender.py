@@ -29,8 +29,8 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
         
         if aantal_reviews < 5:
             # random op basis steden
-            populaireshit = populair(stad, n)
-            return returndict(list(populaireshit.index), stad)
+            populairebedrijven = populair(stad, n)
+            return returndict(list(populairebedrijven.index), stad)
         else:
             # cf op basis steden
             print('cf tijd')

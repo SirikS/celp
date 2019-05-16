@@ -4,83 +4,12 @@ import pandas as pd
 import sklearn.metrics.pairwise as pw
 import numpy as np
 
-def location(userid):
-    # lijst aanmaken waar alle plaatsen van user inkomen
-    plaatsen = []
-    # per stad kijken of user in stad heeft gereviewt
-    for stad in CITIES:
-        for user in USERS[stad]:
-            if user['user_id'] == userid:
-                plaatsen.append(stad)
-    # lijst met aantal reviews per plaats door user            
-    counts = []
-    for stad in plaatsen:
-        count = 0
-        for review in REVIEWS[stad]:
-            if review['user_id'] == userid:
-                count += 1
-        counts.append(count)
-    # series aanmaken waarin het aantal reviews per plaats staan
-    reviews_plaats = pd.Series(index=plaatsen, data=counts).sort_values(ascending=False)
-    return reviews_plaats
-
-
-def select_neighborhood(similarity_matrix, utility_matrix, target_user, target_business):
-    """selects all items with similarity > 0"""
-    # take the businesses where similarity is above 0, if it doesn't work it is an empty series
-    try:
-        bedrijven = similarity_matrix[similarity_matrix[target_business] > 0][target_business]
-    except:
-        return pd.Series()
-    # get the business out which have not been reviewed yet
-    try:
-        eruit = utility_matrix[np.isnan(utility_matrix[target_user])].index
-    except: 
-        # else every business has been reviewed, but still drop the target_business
-        return bedrijven
-        #return bedrijven.drop(target_business)
-
-    # try to get every not seen movie out of the neighborhood, if it is not in a try statement it will give errors
-    for bedrijf in eruit:
-        try:
-            bedrijven = bedrijven.drop(bedrijf)
-        except:
-            pass
-
-    return bedrijven
-
-
-def weighted_mean(neighborhood, utility_matrix, user_id):
-    neighbor_ratings = pd.Series()
-    # for every neighbor,
-    for i in neighborhood.index:
-        try:
-            # calcute the product of the neighborhood and similarity
-            neighbor_ratings.at[i] = utility_matrix[user_id][i] * neighborhood[i]
-        except:
-            # else it doesn't work and should return NaN
-            neighbor_ratings.at[i] = np.nan
-
-    # if neighborhood.values.sum is zero, it cannot devide
-    try:
-        return neighbor_ratings.sum() / neighborhood.values.sum()
-    except:
-        return np.nan
-
-
-def get_businesses(user_id):
-    """Finds all the businesses a user has reviewed"""
-    business = set()
-
-    # find every business that the user has reviewed.
-    for city in CITIES:
-        for i in REVIEWS[city]:
-            if i["user_id"] == user_id:
-                business.add(i["business_id"])
-    return business
-
 
 def cf(userid, stad, n):
+    """
+    berekent het cijfer wat de gebruiker zou geven
+    returnt de beste bedrijven naar aanleiding van het cijfer
+    """
     # maak utilitymatrix van alle bedrijven
     ratings = pd.DataFrame.from_dict(REVIEWS[stad])
     utilitymatrix = ratings.pivot_table(values='stars', columns='user_id', index='business_id', aggfunc='mean')
@@ -122,8 +51,19 @@ def populair(stad, n):
     # maak de gesorteerde series en return deze
     return pd.Series(data= data, index= indexes).sort_values(ascending=False)[:n]
 
+def cbf(business_id, n):
+    """
+    bepaalt vergelijkbare bedrijven dmv content based filtering
+    returnt de best vergelijkbare bedrijven en de stad
+    """
+    # todo
+    # return lijst, stad
+
 
 def returndict(lijst, stad):
+    """
+    returnt de lijst van bedrijven in het correcte format
+    """
     recommended = []
     for bedrijf in lijst:
         # loop door bedrijven in stad tot het bedrijf is gevonden
@@ -140,3 +80,88 @@ def returndict(lijst, stad):
                 # voeg de dict toe aan de uiteindelijke lijst
                 recommended.append(gegevens)
     return recommended
+
+    
+def location(userid):
+    """
+    bepaalt de plaats waar de gebruiker 'woont'
+    """
+    # lijst aanmaken waar alle plaatsen van user inkomen
+    plaatsen = []
+    # per stad kijken of user in stad heeft gereviewt
+    for stad in CITIES:
+        for user in USERS[stad]:
+            if user['user_id'] == userid:
+                plaatsen.append(stad)
+    # lijst met aantal reviews per plaats door user            
+    counts = []
+    for stad in plaatsen:
+        count = 0
+        for review in REVIEWS[stad]:
+            if review['user_id'] == userid:
+                count += 1
+        counts.append(count)
+    # series aanmaken waarin het aantal reviews per plaats staan
+    reviews_plaats = pd.Series(index=plaatsen, data=counts).sort_values(ascending=False)
+    return reviews_plaats
+
+
+def select_neighborhood(similarity_matrix, utility_matrix, target_user, target_business):
+    """
+    selects all items with similarity > 0
+    """
+    # take the businesses where similarity is above 0, if it doesn't work it is an empty series
+    try:
+        bedrijven = similarity_matrix[similarity_matrix[target_business] > 0][target_business]
+    except:
+        return pd.Series()
+    # get the business out which have not been reviewed yet
+    try:
+        eruit = utility_matrix[np.isnan(utility_matrix[target_user])].index
+    except: 
+        # else every business has been reviewed, but still drop the target_business
+        return bedrijven
+        # return bedrijven.drop(target_business)
+
+    # try to get every not seen movie out of the neighborhood, if it is not in a try statement it will give errors
+    for bedrijf in eruit:
+        try:
+            bedrijven = bedrijven.drop(bedrijf)
+        except:
+            pass
+    return bedrijven
+
+
+def weighted_mean(neighborhood, utility_matrix, user_id):
+    """
+    bepaalt het verachte cijfer dat de gebruiker zou geven
+    """
+    neighbor_ratings = pd.Series()
+    # for every neighbor,
+    for i in neighborhood.index:
+        try:
+            # calcute the product of the neighborhood and similarity
+            neighbor_ratings.at[i] = utility_matrix[user_id][i] * neighborhood[i]
+        except:
+            # else it doesn't work and should return NaN
+            neighbor_ratings.at[i] = np.nan
+
+    # if neighborhood.values.sum is zero, it cannot devide
+    try:
+        return neighbor_ratings.sum() / neighborhood.values.sum()
+    except:
+        return np.nan
+
+
+def get_businesses(user_id):
+    """
+    finds all the businesses a user has reviewed
+    """
+    businesslijst = set()
+
+    # find every business that the user has reviewed.
+    for city in CITIES:
+        for i in REVIEWS[city]:
+            if i["user_id"] == user_id:
+                businesslijst.add(i["business_id"])
+    return businesslijst
