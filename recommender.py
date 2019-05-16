@@ -33,14 +33,13 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
             return returndict(list(populaireshit.index), stad)
         else:
             # cf op basis steden
-            pass
-            # return cf(user_id, steden, n)
+            print('cf tijd')
+            cflist = cf(user_id, stad, n)
+
+            return returndict(list(cflist.index), stad)
 
 
-
-
+    # bij geen andere mogelijkheid return random
     if not city:
-        city = random.choice(CITIES)
-        
-            
+        city = random.choice(CITIES)    
     return random.sample(BUSINESSES[city], n)
