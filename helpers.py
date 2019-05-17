@@ -4,6 +4,7 @@ import pandas as pd
 import sklearn.metrics.pairwise as pw
 import numpy as np
 import data
+import math
 
 
 def cf(userid, stad, n):
@@ -30,6 +31,20 @@ def cf(userid, stad, n):
     predicted_ratings = pd.Series(index=indexes, data=data)
     gemiddelde_rating = utilitymatrix.mean()
     predicted_ratings = predicted_ratings + gemiddelde_rating[userid]
+
+    # calculate the mse average rating wise
+    # dit kan alleen als regel 27 weg is in de cf functie, want anders berekent hij geen rating voor het gereviewde bedrijf zelf
+    # dit is gedaan omdat je deze aanbeveling niet wilt tussen de aanbevolen businesses
+    # tomse = predicted_ratings.to_frame()
+    # tomse['gem_rating'] = gemiddelde_rating[userid]
+    # tomse["user_rating"] = np.nan
+    # for bedrijf in tomse.index:
+    #     for review in REVIEWS[stad]:
+    #         if review['user_id'] == userid:
+    #             if review['business_id'] == bedrijf:
+    #                 tomse.at[bedrijf, 'user_rating'] = review['stars']
+    # print(mse(tomse))
+
     # return de hoogste n bedrijven
     return predicted_ratings.sort_values(ascending=False)[:n]
 
@@ -173,3 +188,18 @@ def get_businesses(user_id):
             if i["user_id"] == user_id:
                 businesslijst.add(i["business_id"])
     return businesslijst
+
+
+def mse(predicted_ratings):
+    """
+    calculates the mse of two rows in a dataframe
+    """
+    teller = 0
+    noemer = 0
+    for i in predicted_ratings.index:
+        werkelijk = predicted_ratings.at[i, 'user_rating']
+        verwacht = predicted_ratings.at[i, "gem_rating"]
+        if np.isnan(werkelijk) == False and np.isnan(verwacht) == False:
+            teller += (werkelijk - verwacht)**2
+            noemer += 1
+    return teller / noemer

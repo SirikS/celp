@@ -26,6 +26,7 @@ def recommend(user_id=None, business_id=None, city=None, n=10):
         userdata = helpers.location(user_id)
         stad = list(userdata[:1].index)[0]
         aantal_reviews = userdata.sum()
+        print(aantal_reviews)
         
         if aantal_reviews < 5:
             # random op basis steden
