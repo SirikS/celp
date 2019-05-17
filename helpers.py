@@ -3,6 +3,7 @@ import random
 import pandas as pd
 import sklearn.metrics.pairwise as pw
 import numpy as np
+import data
 
 
 def cf(userid, stad, n):
@@ -51,13 +52,25 @@ def populair(stad, n):
     # maak de gesorteerde series en return deze
     return pd.Series(data= data, index= indexes).sort_values(ascending=False)[:n]
 
-def cbf(business_id, n):
+def cbf(business_id, city, n):
     """
     bepaalt vergelijkbare bedrijven dmv content based filtering
     returnt de best vergelijkbare bedrijven en de stad
     """
-    # todo
-    # return lijst, stad
+    indexes=[]
+    overlapdata=[]
+    cats = data.get_business(city, business_id)['categories'].split(', ')
+    for bedrijf in BUSINESSES[city]:
+        if business_id != bedrijf["business_id"]:
+            catstemp = data.get_business(city, bedrijf["business_id"])['categories'].split(', ')
+            counter = 0
+            for cat in cats:
+                if cat in catstemp:
+                    counter += 1
+            sim = counter / (len(cats) + len(catstemp) - counter)
+            indexes.append(bedrijf['business_id'])
+            overlapdata.append(sim)
+    return pd.Series(index=indexes, data=overlapdata).sort_values(ascending=False)[:n]
 
 
 def returndict(lijst, stad):
@@ -66,19 +79,8 @@ def returndict(lijst, stad):
     """
     recommended = []
     for bedrijf in lijst:
-        # loop door bedrijven in stad tot het bedrijf is gevonden
-        for mogelijkbedrijf in BUSINESSES[stad]:
-            if mogelijkbedrijf["business_id"] == bedrijf:
-                # verzamel de gegevens in een dict
-                gegevens = {
-                            'business_id':str(bedrijf),
-                            'stars':str(mogelijkbedrijf["stars"]),
-                            'name':str(mogelijkbedrijf["name"]),
-                            'city':str(mogelijkbedrijf["city"]),
-                            'adress':str(mogelijkbedrijf["address"])}
-
-                # voeg de dict toe aan de uiteindelijke lijst
-                recommended.append(gegevens)
+        gegevens = data.get_business(stad, bedrijf)
+        recommended.append(gegevens)
     return recommended
 
     
