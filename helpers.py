@@ -30,7 +30,6 @@ def cf(userid, stad, n):
     predicted_ratings = pd.Series(index=indexes, data=data)
     gemiddelde_rating = utilitymatrix.mean()
     predicted_ratings = predicted_ratings + gemiddelde_rating[userid]
-    print(predicted_ratings.sort_values(ascending=False))
     # return de hoogste n bedrijven
     return predicted_ratings.sort_values(ascending=False)[:n]
 
@@ -57,9 +56,12 @@ def cbf(business_id, city, n):
     bepaalt vergelijkbare bedrijven dmv content based filtering
     returnt de best vergelijkbare bedrijven en de stad
     """
+    # haal de categories op van het bedrijf
+    cats = data.get_business(city, business_id)['categories'].split(', ')
     indexes=[]
     overlapdata=[]
-    cats = data.get_business(city, business_id)['categories'].split(', ')
+
+    # vergelijk cats met andere bedrijven dmv keyword overlap
     for bedrijf in BUSINESSES[city]:
         if business_id != bedrijf["business_id"]:
             catstemp = data.get_business(city, bedrijf["business_id"])['categories'].split(', ')
@@ -67,9 +69,13 @@ def cbf(business_id, city, n):
             for cat in cats:
                 if cat in catstemp:
                     counter += 1
+
+            # calculate the similarity per business
             sim = counter / (len(cats) + len(catstemp) - counter)
             indexes.append(bedrijf['business_id'])
             overlapdata.append(sim)
+
+    # return the best matching businesses
     return pd.Series(index=indexes, data=overlapdata).sort_values(ascending=False)[:n]
 
 
